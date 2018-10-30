@@ -1,10 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Admin Override</title>
+  <link rel="shortcut icon" href="https://www.pubnub.com/static/images/structure/favicon.png" type="image/x-icon">
+</head>
+
 <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 <link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 <script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
-<!------ Include the above in your HEAD tag ---------->
+<script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.21.6.js"></script>
+
 <div class="container">
     <br>
     <div class="row">
+        <div class="col-md-3">
+            <a onclick="publishtpl1()" href="javascript:void(0);" class="btn btn-primary btn-lg btn-block btn-huge">TP L1</a>
+        </div>
+        <!--
         <div class="col-md-3">
             <a href="#" class="btn btn-primary btn-lg btn-block btn-huge">Test button</a>
         </div>
@@ -23,9 +36,11 @@
         <div class="col-md-3">
             <a href="#" class="btn btn-danger btn-lg btn-block btn-huge">Test button</a>
         </div>
+-->
     </div>
     <br>
 </div>
+
 <style type="text/css">
     .btn-huge{
         margin: 20px;
@@ -33,3 +48,23 @@
         padding-bottom:30px;
     }
 </style>
+
+
+<script>
+    pubnub = new PubNub({
+        publishKey : 'pub-c-ae388464-6b8a-430e-be0a-64377c198dda',
+        subscribeKey : 'sub-c-77c1dde4-dc65-11e8-b7c4-3e16c06ff365'
+    })
+    function publishtpl1() {
+        var publishConfig = {
+            channel : "teleporter_control",
+            message: "l1"
+        }
+        pubnub.publish(publishConfig, function(status, response) {
+            console.log(status, response);
+            alert("Command Sent. Status: "+status.statusCode);
+        })
+    }
+</script>
+
+</html>

@@ -15,7 +15,16 @@
     <br>
     <div class="row">
         <div class="col-md-3">
-            <a onclick="publishtpl1()" href="javascript:void(0);" class="btn btn-primary btn-lg btn-block btn-huge">TP L1</a>
+            <a onclick="publish('tp','off')" href="javascript:void(0);" class="btn btn-warning btn-lg btn-block btn-huge">TP OFF</a>
+        </div>
+        <div class="col-md-3">
+            <a onclick="publish('tp','l1')" href="javascript:void(0);" class="btn btn-primary btn-lg btn-block btn-huge">TP L1</a>
+        </div>
+        <div class="col-md-3">
+            <a onclick="publish('tp','l2')" href="javascript:void(0);" class="btn btn-primary btn-lg btn-block btn-huge">TP L2</a>
+        </div>
+        <div class="col-md-3">
+            <a onclick="publish('tp','release')" href="javascript:void(0);" class="btn btn-danger btn-lg btn-block btn-huge">TP Release</a>
         </div>
         <!--
         <div class="col-md-3">
@@ -55,14 +64,14 @@
         publishKey : 'pub-c-ae388464-6b8a-430e-be0a-64377c198dda',
         subscribeKey : 'sub-c-77c1dde4-dc65-11e8-b7c4-3e16c06ff365'
     })
-    function publishtpl1() {
+    function publish(channel, message) {
         var publishConfig = {
-            channel : "teleporter_control",
-            message: "l1"
+            channel : channel,
+            message: message
         }
         pubnub.publish(publishConfig, function(status, response) {
-            console.log(status, response);
-            alert("Command Sent. Status: "+status.statusCode);
+            console.log(status, response, message);
+            alert("Command Sent: "+channel+" : "+message+"  |  Status: "+status.statusCode);
         })
     }
 </script>

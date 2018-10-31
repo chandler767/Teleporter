@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SyncScene.unity
     guid: 17e63232e40a24ad78406b05f2d69219
+  - enabled: 1
+    path: Assets/Scenes/Reset.unity
+    guid: 82ba9b3d659e64171b3f66672f499e1a
   m_configObjects: {}

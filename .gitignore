@@ -1,4 +1,3 @@
-
 # Project
 Control/control.mpk
 
@@ -42,3 +41,4 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+.out/

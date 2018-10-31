@@ -1,11 +1,16 @@
+# Project
+Control/control.mpk
+
+# OSX
+.DS_Store
+
+# Unity
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
 [Bb]uild/
 [Bb]uilds/
 Assets/AssetStoreTools*
-
-.DS_Store
 
 # Visual Studio cache directory
 .vs/

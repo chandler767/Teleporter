@@ -9,9 +9,11 @@ using PubNubAPI;
 
 public class GestureScript : MonoBehaviour {
 
-    public Text onText;
-    public Image onGesture;
+    private Text onText;
+    private Image onGesture;
     private float onTimeLeft;
+    private bool handed;
+
 
     public static PubNub pubnub;
 
@@ -42,31 +44,37 @@ public class GestureScript : MonoBehaviour {
 
     void Update()
     {
-
-        if (GetGesture(MLHands.Left, MLHandKeyPose.Thumb) || GetGesture(MLHands.Right, MLHandKeyPose.Thumb)) {
-            MLHands.Stop();
-            pubnub.Publish()
-                .Channel("tp")
-                .Message("l1")
-                .Async((result, status) => {    
-                    if (!status.Error) {
-                        Debug.Log(string.Format("Publish Timetoken: {0}", result.Timetoken));
-                    } else {
-                        Debug.Log(status.Error);
-                        Debug.Log(status.ErrorData.Info);
-                    }
-                });
-            onText.color = Color.green; // Set color to green.
-            onGesture.color = Color.green; // Set color to green.
-            onTimeLeft = 1.0f; // Transition color back to white.
+        if (!handed) {
+            if (GetGesture(MLHands.Left, MLHandKeyPose.Thumb) || GetGesture(MLHands.Right, MLHandKeyPose.Thumb)) {
+                handed = true;
+                pubnub.Publish()
+                    .Channel("tp")
+                    .Message("l1")
+                    .Async((result, status) => {    
+                        if (!status.Error) {
+                            Debug.Log(string.Format("Publish Timetoken: {0}", result.Timetoken));
+                        } else {
+                            Debug.Log(status.Error);
+                            Debug.Log(status.ErrorData.Info);
+                        }
+                    });
+                onText.color = Color.green; // Set color to green.
+                onGesture.color = Color.green; // Set color to green.
+                onTimeLeft = 0.75f; // Transition color back to white.
+                StartCoroutine(NextScene());
+            }
         }
-        
         if (onTimeLeft > Time.deltaTime) {
             onText.color = Color.Lerp(onText.color, Color.white, Time.deltaTime / onTimeLeft); // Calculate interpolated color.
             onGesture.color = Color.Lerp(onGesture.color, Color.white, Time.deltaTime / onTimeLeft); // Calculate interpolated color.
             onTimeLeft -= Time.deltaTime; // Update the timer.
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1); // Next scene
         }
+    }
+
+    IEnumerator NextScene()
+    {
+        yield return new WaitForSeconds(1.0f);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1); // Next scene
     }
 
     bool GetGesture(MLHand hand, MLHandKeyPose type)

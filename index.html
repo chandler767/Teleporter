@@ -1,1 +1,351 @@
-My GitHub Page
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Teleporter</title>
+  <link rel="shortcut icon" href="https://www.pubnub.com/static/images/structure/favicon.png" type="image/x-icon">
+</head>
+
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+<script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.21.6.js"></script>
+<script type="text/javascript" src="https://pubnub.github.io/eon/v/eon/1.0.0/eon.js"></script>
+<link type="text/css" rel="stylesheet" href="https://pubnub.github.io/eon/v/eon/1.0.0/eon.css"/>
+
+<div class="container">
+    <br>
+	<div class="panel panel-default">
+		<div class="panel-heading text-center">
+			<h3 class="panel-title">TP Sync State</h3>
+		</div>
+		<div class="panel-body">
+			<div id="sync-gauge" class="card-body"></div>
+		</div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-heading text-center">
+			<h3 class="panel-title">TP Sync History</h3>
+		</div>
+		<div class="panel-body">
+			<div id="sync-history" class="card-body"></div>
+		</div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-heading text-center">
+			<h3 class="panel-title">Ready Users History</h3>
+		</div>
+		<div class="panel-body">
+			<div id="ready-history" class="card-body"></div>
+		</div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-heading text-center">
+			<h3 class="panel-title">Controls</h3>
+		</div>
+		<div class="panel-body">
+			<div class="form-group btn-group-lg">
+			  	<input type="checkbox" name="fancy-checkbox-warning" id="fancy-checkbox-warning" autocomplete="off" />
+			    <div class="btn-group">
+			        <label for="fancy-checkbox-warning" class="btn btn-warning">
+			            <span class="glyphicon glyphicon-ok"></span>
+			            <span> </span>
+			        </label>
+			        <label for="fancy-checkbox-warning" class="btn btn-default active">
+			            Ready To Start 
+			        </label>
+			    </div>
+			</div>
+		</div>
+	</div>
+
+    <br>
+</div>
+
+<style type="text/css">
+    .form-group {
+    	margin: auto;
+		display: flex;
+		flex-direction: row;
+        padding-top:30px;
+        padding-bottom:30px;
+        justify-content: center;
+    }
+    .btn-group {
+    	margin-top:30px;
+        margin-bottom:30px;
+        margin-right: 50px;
+        margin-left: 50px;
+    }
+    .form-group input[type="checkbox"] {
+	    display: none;
+	}
+	.form-group input[type="checkbox"] + .btn-group > label span {
+	    width: 20px;
+	}
+
+	.form-group input[type="checkbox"] + .btn-group > label span:first-child {
+	    display: none;
+	}
+	.form-group input[type="checkbox"] + .btn-group > label span:last-child {
+	    display: inline-block;   
+	}
+
+	.form-group input[type="checkbox"]:checked + .btn-group > label span:first-child {
+	    display: inline-block;
+	}
+	.form-group input[type="checkbox"]:checked + .btn-group > label span:last-child {
+	    display: none;   
+}
+</style>
+
+<script>
+    pubnub = new PubNub({
+        publishKey : 'pub-c-ae388464-6b8a-430e-be0a-64377c198dda',
+        subscribeKey : 'sub-c-77c1dde4-dc65-11e8-b7c4-3e16c06ff365'
+    })
+
+    function publish(channel, message) {
+        var publishConfig = {
+            channel : channel,
+            message: message
+        }
+        pubnub.publish(publishConfig, function(status, response) {
+            console.log(status, response, message);
+            alert("Command Sent: "+channel+" : "+message+"  |  Status: "+status.statusCode);
+        })
+    }
+
+	eon.chart({
+	  pubnub: pubnub,
+	  history: true,
+	  rate: 1000,
+	  channels: ['tp-status'],
+	  generate: {
+	    bindto: '#sync-gauge',
+	    data: {
+	      type: 'gauge',
+	    },
+	    gauge: {
+	      min: 0,
+	      max: 100
+	    },
+	    color: {
+	      pattern: ['#FF0000', '#F6C600', '#60B044'],
+	      threshold: {
+	        values: [30, 60, 90]
+	      }
+	    }
+	  }
+	});
+
+	var __eon_cols = ["Status"]; 
+	var __eon_labels = {"Status":"Sync Status"}; 
+	chart = eon.chart({
+	  pubnub: pubnub,
+	  channels: ['tp-status'],
+	  history: true,
+	  flow: true,
+	  rate: 1000,
+	  limit: 5,
+	  generate: {
+	    bindto: "#sync-history",
+	    data: {
+	      colors: {"Sync Status":"#D70060"},
+	      type: "area-step"
+	    },
+	    transition: {
+	      duration: 250
+	    },
+	    axis: {
+	      x: {
+	        label: "",
+			tick: {
+				format: '%H:%M'
+			}
+	      },
+	      y: {
+	        label: ""
+	      }
+	    },
+	    grid: {
+	      x: {
+	        show: true 
+	      },
+	      y: {
+	        show: true 
+	      }
+	    },
+	    tooltip: {
+	     show: true
+	    },
+	    point: {
+	      show: true
+	    }
+	  },
+	  transform: function(message) {
+	    var message = eon.c.flatten(message.eon);
+	    var o = {};
+	    for(index in message) {
+	      if(__eon_cols.indexOf(index) > -1){
+	        o[__eon_labels[index] || index] = message[index];
+	      }
+	    }
+	    return {
+	      eon: o
+	    };
+	  }
+	});
+
+	var __eon_col_rdy = ["Ready"]; 
+	var __eon_labels_rdy = {"Ready":"Ready Users"}; 
+	chart = eon.chart({
+	  pubnub: pubnub,
+	  channels: ['tp-ready'],
+	  history: true,
+	  flow: true,
+	  rate: 1000,
+	  limit: 5,
+	  generate: {
+	    bindto: "#ready-history",
+	    data: {
+	      colors: {"Ready Users":"#D70060"},
+	      type: "area-step"
+	    },
+	    transition: {
+	      duration: 250
+	    },
+	    axis: {
+	      x: {
+	        label: "",
+			tick: {
+				format: '%H:%M'
+			}
+	      },
+	      y: {
+	        label: ""
+	      }
+	    },
+	    grid: {
+	      x: {
+	        show: true 
+	      },
+	      y: {
+	        show: true 
+	      }
+	    },
+	    tooltip: {
+	     show: true
+	    },
+	    point: {
+	      show: true
+	    }
+	  },
+	  transform: function(message) {
+	    var message = eon.c.flatten(message.eon);
+	    var o = {};
+	    for(index in message) {
+	      if(__eon_cols_rdy.indexOf(index) > -1){
+	        o[__eon_labels_rdy[index] || index] = message[index];
+	      }
+	    }
+	    return {
+	      eon: o
+	    };
+	  }
+	});
+
+	/*
+
+
+	eon.chart({
+		pubnub: pubnub,
+		channels: ['tp-status'],
+		history: true,
+		flow: true,
+		rate: 1000,
+		limit: 5,
+		generate: {
+			bindto: "#sync-history",
+			data: {
+				colors: {"Sync Status":"#D70060"},
+				type: "area-step"
+			},
+			transition: {
+				duration: 250
+			},
+			grid: {
+				x: {
+					show: true 
+				},
+				y: {
+					show: true 
+				}
+			},
+			tooltip: {
+				show: true
+			},
+			point: {
+				show: true
+			}
+		},
+		transform: function(message) {
+			var message = eon.c.flatten(message.eon);
+			var o = {};
+			for(index in message) {
+				if(__eon_cols.indexOf(index) > -1){
+					o[__eon_labels[index] || index] = message[index];
+				}
+			}
+			return {
+				eon: o
+			};
+		}
+	});
+	eon.chart({
+		pubnub: pubnub,
+		channels: ['tp-status'],
+		history: true,
+		flow: true,
+		rate: 1000,
+		limit: 5,
+		generate: {
+			bindto: "#ready-history",
+			data: {
+				colors: {"Sync Status":"#05e3f1"},
+				type: "area-spline"
+			},
+			transition: {
+				duration: 250
+			},
+			grid: {
+				x: {
+					show: true 
+				},
+				y: {
+					show: true 
+				}
+			},
+			tooltip: {
+				show: true
+			},
+			point: {
+				show: true
+			}
+		},
+		transform: function(message) {
+			var message = eon.c.flatten(message.eon);
+			var o = {};
+			for(index in message) {
+				if(__eon_cols.indexOf(index) > -1){
+					o[__eon_labels[index] || index] = message[index];
+				}
+			}
+			return {
+				eon: o
+			};
+		}
+	});*/
+
+</script>
+
+</html>

@@ -107,20 +107,19 @@
 
 	$(document).ready( function(){
 		console.log($.cookie('checkbox'));
-        if ($.cookie('checkbox') == true) {
+        if ($.cookie("checkbox")) {
             $("#checkbox-ready").prop('checked', true);
         }
-
 	    $('#checkbox-ready').click(function(){
+	    	var date = new Date();
+			date.setTime(date.getTime() + (30 * 60 * 1000));
 		    if($(this).is(':checked')){
 		        publish("ready","ready");
+		        $.cookie("checkbox", "true");
 		    } else {
 		       	publish("ready","unready");
+		       	$.cookie("checkbox", null);
 		    }
-		    var date = new Date();
-			var minutes = 30;
-			date.setTime(date.getTime() + (minutes * 60 * 1000));
-			$.cookie("checkbox", $(this).is(':checked'), { expires: date });
 		});
 	});
    
@@ -228,8 +227,8 @@
 	  generate: {
 	    bindto: "#ready-history",
 	    data: {
-	      colors: {"Ready Users":"#D70060"},
-	      type: "area-spline"
+	      colors: {"Ready Users":"#0000FF"},
+	      type: "area"
 	    },
 	    transition: {
 	      duration: 250

@@ -6,6 +6,7 @@
 </head>
 
 <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 <link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 <script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
 <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.21.6.js"></script>
@@ -44,13 +45,13 @@
 		</div>
 		<div class="panel-body">
 			<div class="form-group btn-group-lg">
-			  	<input type="checkbox" name="fancy-checkbox-warning" id="fancy-checkbox-warning" autocomplete="off" />
+			  	<input type="checkbox" name="checkbox-ready" id="checkbox-ready" autocomplete="off" />
 			    <div class="btn-group">
-			        <label for="fancy-checkbox-warning" class="btn btn-warning">
+			        <label for="checkbox-ready" class="btn btn-warning">
 			            <span class="glyphicon glyphicon-ok"></span>
 			            <span> </span>
 			        </label>
-			        <label for="fancy-checkbox-warning" class="btn btn-default active">
+			        <label for="checkbox-ready" class="btn btn-default active">
 			            Ready To Start 
 			        </label>
 			    </div>
@@ -104,6 +105,25 @@
         subscribeKey : 'sub-c-77c1dde4-dc65-11e8-b7c4-3e16c06ff365'
     })
 
+	$(document).ready( function(){
+		console.log($.cookie('checkbox'));
+        if ($.cookie('checkbox') == true) {
+            $("#checkbox-ready").prop('checked', true);
+        }
+
+	    $('#checkbox-ready').click(function(){
+		    if($(this).is(':checked')){
+		        publish("ready","ready");
+		    } else {
+		       	publish("ready","unready");
+		    }
+		    var date = new Date();
+			var minutes = 30;
+			date.setTime(date.getTime() + (minutes * 60 * 1000));
+			$.cookie("checkbox", $(this).is(':checked'), { expires: date });
+		});
+	});
+   
     function publish(channel, message) {
         var publishConfig = {
             channel : channel,
@@ -111,7 +131,7 @@
         }
         pubnub.publish(publishConfig, function(status, response) {
             console.log(status, response, message);
-            alert("Command Sent: "+channel+" : "+message+"  |  Status: "+status.statusCode);
+            alert("Your Ready State Has Been Changed!");
         })
     }
 
@@ -132,7 +152,7 @@
 	    color: {
 	      pattern: ['#FF0000', '#F6C600', '#60B044'],
 	      threshold: {
-	        values: [30, 60, 90]
+	        values: [40, 60, 90]
 	      }
 	    }
 	  }
@@ -158,13 +178,13 @@
 	    },
 	    axis: {
 	      x: {
-	        label: "",
+	        label: "Time",
 			tick: {
 				format: '%H:%M'
 			}
 	      },
 	      y: {
-	        label: ""
+	        label: "Sync Completion"
 	      }
 	    },
 	    grid: {
@@ -196,7 +216,7 @@
 	  }
 	});
 
-	var __eon_col_rdy = ["Ready"]; 
+	var __eon_cols_rdy = ["Ready"]; 
 	var __eon_labels_rdy = {"Ready":"Ready Users"}; 
 	chart = eon.chart({
 	  pubnub: pubnub,
@@ -204,25 +224,25 @@
 	  history: true,
 	  flow: true,
 	  rate: 1000,
-	  limit: 5,
+	  limit: 10,
 	  generate: {
 	    bindto: "#ready-history",
 	    data: {
 	      colors: {"Ready Users":"#D70060"},
-	      type: "area-step"
+	      type: "area-spline"
 	    },
 	    transition: {
 	      duration: 250
 	    },
 	    axis: {
 	      x: {
-	        label: "",
+	        label: "Time",
 			tick: {
 				format: '%H:%M'
 			}
 	      },
 	      y: {
-	        label: ""
+	        label: "Number Of Ready Users"
 	      }
 	    },
 	    grid: {
@@ -253,99 +273,6 @@
 	    };
 	  }
 	});
-
-	/*
-
-
-	eon.chart({
-		pubnub: pubnub,
-		channels: ['tp-status'],
-		history: true,
-		flow: true,
-		rate: 1000,
-		limit: 5,
-		generate: {
-			bindto: "#sync-history",
-			data: {
-				colors: {"Sync Status":"#D70060"},
-				type: "area-step"
-			},
-			transition: {
-				duration: 250
-			},
-			grid: {
-				x: {
-					show: true 
-				},
-				y: {
-					show: true 
-				}
-			},
-			tooltip: {
-				show: true
-			},
-			point: {
-				show: true
-			}
-		},
-		transform: function(message) {
-			var message = eon.c.flatten(message.eon);
-			var o = {};
-			for(index in message) {
-				if(__eon_cols.indexOf(index) > -1){
-					o[__eon_labels[index] || index] = message[index];
-				}
-			}
-			return {
-				eon: o
-			};
-		}
-	});
-	eon.chart({
-		pubnub: pubnub,
-		channels: ['tp-status'],
-		history: true,
-		flow: true,
-		rate: 1000,
-		limit: 5,
-		generate: {
-			bindto: "#ready-history",
-			data: {
-				colors: {"Sync Status":"#05e3f1"},
-				type: "area-spline"
-			},
-			transition: {
-				duration: 250
-			},
-			grid: {
-				x: {
-					show: true 
-				},
-				y: {
-					show: true 
-				}
-			},
-			tooltip: {
-				show: true
-			},
-			point: {
-				show: true
-			}
-		},
-		transform: function(message) {
-			var message = eon.c.flatten(message.eon);
-			var o = {};
-			for(index in message) {
-				if(__eon_cols.indexOf(index) > -1){
-					o[__eon_labels[index] || index] = message[index];
-				}
-			}
-			return {
-				eon: o
-			};
-		}
-	});*/
-
 </script>
 
 </html>

@@ -1,4 +1,4 @@
-// Converts events to status complete for an eon chart.
+// Converts events to status complete for an EON chart.
 export default (request) => { 
     const pubnub = require('pubnub');
     const kvstore = require('kvstore');

@@ -31,11 +31,6 @@ public class ControlSelection : MonoBehaviour {
         pnConfiguration.SubscribeKey = "sub-c-77c1dde4-dc65-11e8-b7c4-3e16c06ff365"; // YOUR SUBSCRIBE KEY HERE.
         pubnub = new PubNub(pnConfiguration);
     }
-    
-    void OnDestroy () {
-        MLInput.OnTriggerDown -= HandleOnTriggerDown;
-        MLInput.Stop();
-    }
 
     void Update () {
         timeLeft -= Time.deltaTime;
@@ -90,7 +85,7 @@ public class ControlSelection : MonoBehaviour {
             } else if (level == 3) {
                 pubnub.Publish()
                     .Channel("tp")
-                    .Message("app")
+                    .Message("release")
                     .Async((result, status) => {    
                         if (!status.Error) {
                             Debug.Log(string.Format("Publish Timetoken: {0}", result.Timetoken));
@@ -99,6 +94,8 @@ public class ControlSelection : MonoBehaviour {
                             Debug.Log(status.ErrorData.Info);
                         }
                     });
+                MLInput.OnTriggerDown -= HandleOnTriggerDown;
+                MLInput.Stop();
                 StartCoroutine(NextScene()); // Game over - win
             }
             level = level+1;
@@ -123,7 +120,7 @@ public class ControlSelection : MonoBehaviour {
 
     IEnumerator NextScene()
     {
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(2.5f);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1); // Next scene
     }
 }

@@ -6,9 +6,9 @@
 #include <PubSubClient.h>
 #include <Servo.h>
 
- // Connection info.
-const char* ssid = "pubnub-visitor";
-const char* password =  "data-stream!";
+// Connection info.
+const char* ssid = "pn-iot";
+const char* password =  "41116432";
 const char* mqttServer = "mqtt.pndsn.com";
 const int mqttPort = 1883;
 const char* clientID = "pub-c-ae388464-6b8a-430e-be0a-64377c198dda/sub-c-77c1dde4-dc65-11e8-b7c4-3e16c06ff365/teleporter";
@@ -52,6 +52,7 @@ void setup() {
   digitalWrite(relay, HIGH);
 
   // Start WiFi and connect.
+  WiFi.mode(WIFI_STA); // SETS TO STATION MODE!
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);

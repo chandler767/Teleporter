@@ -81,7 +81,7 @@ public class GestureScript : MonoBehaviour {
         {
             if (hand.KeyPose == type)
             {
-                if (hand.KeyPoseConfidence > 0.98f)
+                if (hand.KeyPoseConfidence > 0.99f)
                 {
                     return true;
                 }
